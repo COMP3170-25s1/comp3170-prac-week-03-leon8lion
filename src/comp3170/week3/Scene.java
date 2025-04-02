@@ -10,13 +10,14 @@ import static org.lwjgl.opengl.GL11.glPolygonMode;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
 
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import comp3170.GLBuffers;
 import comp3170.Shader;
 import comp3170.ShaderLibrary;
-
+import comp3170.Math.*;
 public class Scene {
 
 	final private String VERTEX_SHADER = "vertex.glsl";
@@ -30,6 +31,15 @@ public class Scene {
 	private int colourBuffer;
 
 	private Shader shader;
+	
+	private Matrix4f modelMatrix = new Matrix4f();
+	private Matrix4f transMatrix = new Matrix4f();
+	private Matrix4f rotMatrix = new Matrix4f();
+	private Matrix4f scalMatrix = new Matrix4f();
+	
+	final private float MOVEMENT_SPEED = 0.25f;
+	final private float SCALE = 0.1f;
+	final private float ROTATION_RATE = TAU/12;
 
 	public Scene() {
 
@@ -77,14 +87,29 @@ public class Scene {
 			// @formatter:on
 
 		indexBuffer = GLBuffers.createIndexBuffer(indices);
+		
+		scaleMatrix(0.1f, 0.1f, modelMatrix);
+		translationMatrix(-0.5f, 0.0f, modelMatrix);
+		
+		
 
 	}
+	
+	public void update(float deltaTime) {
+		float movement = MOVEMENT_SPEED * deltaTime;
+		float rotation = ROTATION_RATE * deltaTime;
+	}
+	
+	
 
 	public void draw() {
 		
 		shader.enable();
 		// set the attributes
 		shader.setAttribute("a_position", vertexBuffer);
+		
+		shader.setUniform("u_modelMatrix", modelMatrix);
+		
 		shader.setAttribute("a_colour", colourBuffer);
 
 		// draw using index buffer
@@ -92,6 +117,10 @@ public class Scene {
 		
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_INT, 0);
+		
+		
+		translationMatrix(-0.5f, 0.0f, modelMatrix);
+
 
 	}
 
@@ -107,7 +136,7 @@ public class Scene {
 
 	public static Matrix4f translationMatrix(float tx, float ty, Matrix4f dest) {
 		// clear the matrix to the identity matrix
-		dest.identity();
+		//dest.identity();
 
 		//     [ 1 0 0 tx ]
 		// T = [ 0 1 0 ty ]
@@ -133,9 +162,20 @@ public class Scene {
 	 */
 
 	public static Matrix4f rotationMatrix(float angle, Matrix4f dest) {
+		
+		//dest.identity();
+		
+		dest.m00((float) Math.cos(angle));
+		dest.m01((float) Math.sin(angle));
+		dest.m10((float) Math.sin(angle));
+		dest.m11((float) Math.cos(angle));
 
 		// TODO: Your code here
-
+		
+		//     [ 1 ry 0 tx ]
+		// T = [ rx 1 0 ty ]
+	    //     [ 0 0 0 0  ]
+		//     [ 0 0 0 1  ]
 		return dest;
 	}
 
@@ -152,7 +192,15 @@ public class Scene {
 	public static Matrix4f scaleMatrix(float sx, float sy, Matrix4f dest) {
 
 		// TODO: Your code here
-
+		
+		//dest.identity();
+		
+		dest.m00(sx);
+		dest.m11(sy);
+		//     [ sx 0 0 0 ]
+		// T = [ 0 sy 0 0 ]
+	    //     [ 0 0 0 0  ]
+		//     [ 0 0 0 1  ]
 		return dest;
 	}
 
