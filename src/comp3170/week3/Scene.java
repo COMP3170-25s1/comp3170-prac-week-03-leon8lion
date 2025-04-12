@@ -17,7 +17,7 @@ import org.joml.Vector4f;
 import comp3170.GLBuffers;
 import comp3170.Shader;
 import comp3170.ShaderLibrary;
-import comp3170.Math.*;
+import static comp3170.Math.*;
 public class Scene {
 
 	final private String VERTEX_SHADER = "vertex.glsl";
